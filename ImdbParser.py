@@ -24,6 +24,25 @@ class IMDB(object):
         self.imdb = imdbpie.Imdb()
         self.results = None
         self.movie = None
+
+    def __getDirectors(self, movie):
+        try:
+            directors = self.movie.directors_summary
+        except AttributeError:
+            # For ImdbPie before 1.3.1
+            directors = self.movie.directors
+
+        return directors
+
+    def __getWriters(self, movie):
+        try:
+            writers = self.movie.writers_summary
+        except AttributeError:
+            # For ImdbPie before 1.3.1
+            writers = self.movie.writers
+
+        return writers
+
         
     def search(self, title):
         try:
@@ -62,11 +81,12 @@ class IMDB(object):
                 
     def summary(self):
         if self.movie:
-            return {'director' : u" | ".join([director.name for director in self.movie.directors]), 
+            return {'directors' : u" | ".join([director.name for director in self.__getDirectors(self.movie)]), 
                     'runtime' : self.movie.runtime, 'rating' : self.movie.rating, 
                     'name' : self.movie.title, 'votes' : self.movie.votes, 'cover' : self.movie.cover_url, 
                     'genre' : u" | ".join([genre for genre in self.movie.genres]), 
-                    'writers' : u" | ".join([writer.name for writer in self.movie.writers]), 'mpaa' : self.movie.certification,
+                    'writers' : u" | ".join([writer.name for writer in self.__getWriters(self.movie)]),
+                    'mpaa' : self.movie.certification,
                     'description' : self.movie.plot_outline, 
                     'url' : u"http://www.imdb.com/title/%s" % self.movie.imdb_id, 
                     'year' : self.movie.year}
